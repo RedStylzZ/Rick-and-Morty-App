@@ -1,6 +1,6 @@
 import './App.css';
 import React, {useState, useEffect} from "react";
-import {fetchPeople, hasState, mapToName} from "./api_fetch";
+import {fetchPeople} from "./api_fetch";
 
 
 async function callAPI(url) {
@@ -8,7 +8,6 @@ async function callAPI(url) {
 }
 
 function Character(props) {
-    // console.log("Props: ", props)
     return (
         <div className={"Card"}>
             <h2>{props.name}</h2>
@@ -29,32 +28,32 @@ function Characters(props) {
     return null;
 }
 
- const changeCharacter = (url, setCharacters) => {
+/* const changeCharacter = (setCharacters) => (url) => {
     // console.log("Current: ", url)
-    if (url !== null) {
+    if (!url) {
         callAPI(url).then(setCharacters)
     }
-}
+}*/
 
-const changePage = (characters, setPrevPage, setNextPage) => {
-    // console.log("Prev: ", characters.info.prev)
-    // console.log("Next: ", characters.info.next)
-    setPrevPage(characters.info.prev);
-    setNextPage(characters.info.next);
+const changePage = (setApiUrl) => {
+    return (url) => {
+        // console.log("Prev: ", characters.info.prev)
+        // console.log("Next: ", characters.info.next)
+        setApiUrl(url)
+    }
 }
 
 function App() {
     const [characters, setCharacters] = useState("Loading")
-    const [prevPage, setPrevPage] = useState("")
-    const [nextPage, setNextPage] = useState("https://rickandmortyapi.com/api/character/?page=2")
-    const apiURL = "https://rickandmortyapi.com/api/character/"
+    // const [prevPage, setPrevPage] = useState("https://rickandmortyapi.com/api/character/")
+    // const [nextPage, setNextPage] = useState("https://rickandmortyapi.com/api/character/")
+    const [apiURL, setApiUrl] = useState("https://rickandmortyapi.com/api/character/")
+    const _changePage = changePage(setApiUrl)
+    // const _changeCharacter = changeCharacter(setCharacters)
 
     useEffect(() => {
-        // callAPI().then(setCharacters)
-        callAPI(apiURL).then(setCharacters).then(() => changePage(characters, setPrevPage, setNextPage))
-        // changePage(apiURL)
-    }, [])
-
+        callAPI(apiURL).then(setCharacters)
+    }, [apiURL])
     return (
         <div className={"App"}>
             <header className={"App-header"}>
@@ -62,15 +61,11 @@ function App() {
                 <div className={"InputFields"}>
                     <input type={"button"} value={"Previous Page"}
                            onClick={() => {
-                               changePage(characters, setPrevPage, setNextPage)
-                               changeCharacter(prevPage, setCharacters)
+                               _changePage(characters.info.prev)
                            }}/>
                     <input type={"button"} value={"Next Page"}
                            onClick={() => {
-                               console.log(nextPage)
-                               changePage(characters, setPrevPage, setNextPage)
-                               console.log(nextPage)
-                               changeCharacter(nextPage, setCharacters)
+                               _changePage(characters.info.next)
                            }}/>
                 </div>
                 <div className={"Outer"}>
