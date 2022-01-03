@@ -8,52 +8,52 @@ async function callAPI(url) {
 }
 
 function Character(props) {
+    const {name, image, gender, status, origin} = props.character
     return (
         <div className={"Card"}>
-            <h2>{props.name}</h2>
-            <img src={props.image} alt={props.name}/>
+            <h2>{name}</h2>
+            <img src={image} alt={name}/>
             <div className={"InfoCard"}>
-                <p>Gender: {props.gender}</p>
-                <p>Status: {props.status}</p>
-                <p>Origin: {props.origin.name}</p>
+                <p>Gender: {gender}</p>
+                <p>Status: {status}</p>
+                <p>Origin: {origin.name}</p>
             </div>
         </div>
     );
 }
 
 function Characters(props) {
-    if (Array.isArray(props.characters.results)) {
-        return props.characters.results.map(Character);
+    if (props.characters && props.characters.results && props.characters.results.length) {
+        return props.characters.results.map((character) =>
+            (<Character character={character} key={character.id}/>)
+        );
     }
     return null;
 }
 
-/* const changeCharacter = (setCharacters) => (url) => {
-    // console.log("Current: ", url)
-    if (!url) {
+ const changeCharacter = (setCharacters, url) => {
+    if (url) {
         callAPI(url).then(setCharacters)
     }
-}*/
+}
 
 const changePage = (setApiUrl) => {
     return (url) => {
-        // console.log("Prev: ", characters.info.prev)
-        // console.log("Next: ", characters.info.next)
         setApiUrl(url)
     }
 }
 
 function App() {
-    const [characters, setCharacters] = useState("Loading")
-    // const [prevPage, setPrevPage] = useState("https://rickandmortyapi.com/api/character/")
-    // const [nextPage, setNextPage] = useState("https://rickandmortyapi.com/api/character/")
+    let charInput = React.createRef()
+    const [characters, setCharacters] = useState([])
     const [apiURL, setApiUrl] = useState("https://rickandmortyapi.com/api/character/")
+    const nameURL = "https://rickandmortyapi.com/api/character/?name="
     const _changePage = changePage(setApiUrl)
-    // const _changeCharacter = changeCharacter(setCharacters)
 
     useEffect(() => {
-        callAPI(apiURL).then(setCharacters)
+        changeCharacter(setCharacters, apiURL)
     }, [apiURL])
+
     return (
         <div className={"App"}>
             <header className={"App-header"}>
@@ -67,6 +67,11 @@ function App() {
                            onClick={() => {
                                _changePage(characters.info.next)
                            }}/>
+                    <input type={"textarea"} ref={charInput} onKeyPress={e => {
+                        if (e.key === "Enter") {
+                            _changePage(nameURL + charInput.current.value)
+                        }
+                    }}/>
                 </div>
                 <div className={"Outer"}>
                     <div className={"Inner"}>
